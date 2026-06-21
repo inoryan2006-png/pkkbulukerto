@@ -1,0 +1,789 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Phone, Mail, Facebook, MessageCircle, Share2, Menu, X, 
+  ChevronDown, ArrowRight, User, LogOut, Edit, Trash2, Plus,
+  Image as ImageIcon, LayoutDashboard, FileText, Users, Settings
+} from 'lucide-react';
+
+// --- FONT INJECTION ---
+const injectFonts = () => {
+  const link = document.createElement('link');
+  link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+};
+
+// --- MOCK DATABASE (SEED DATA) ---
+const initialData = {
+  profil: {
+    visi: "Terwujudnya keluarga yang beriman dan bertaqwa kepada Tuhan Yang Maha Esa, berakhlak mulia dan berbudi luhur, sehat sejahtera, maju mandiri, kesetaraan dan keadilan gender serta kesadaran hukum dan lingkungan.",
+    misi: [
+      "Meningkatkan mental spiritual, perilaku hidup dengan menghayati dan mengamalkan Pancasila.",
+      "Meningkatkan pendidikan dan keterampilan.",
+      "Meningkatkan kualitas dan kuantitas pangan keluarga.",
+      "Meningkatkan derajat kesehatan keluarga dan lingkungan."
+    ],
+    tugas: "Memberdayakan keluarga untuk meningkatkan kesejahteraan menuju terwujudnya keluarga yang beriman dan bertaqwa kepada Tuhan Yang Maha Esa, berakhlak mulia dan berbudi luhur, sehat sejahtera, maju dan mandiri, kesetaraan dan keadilan gender serta kesadaran hukum dan lingkungan."
+  },
+  struktur: [
+    { id: 1, jabatan: "Ketua", nama: "SITI ANISATUL KHOIRIYAH, S.Sos" },
+    { id: 2, jabatan: "Sekretaris", nama: "[Nama Sekretaris]" },
+    { id: 3, jabatan: "Bendahara", nama: "[Nama Bendahara]" },
+    { id: 4, jabatan: "Ketua Pokja I", nama: "[Nama Ketua Pokja I]" },
+    { id: 5, jabatan: "Ketua Pokja II", nama: "[Nama Ketua Pokja II]" },
+    { id: 6, jabatan: "Ketua Pokja III", nama: "[Nama Ketua Pokja III]" },
+    { id: 7, jabatan: "Ketua Pokja IV", nama: "[Nama Ketua Pokja IV]" }
+  ],
+  pokja: {
+    1: {
+      title: "Pokja I — Penghayatan dan Pengamalan Pancasila",
+      items: [
+        "Keagamaan (pengajian rutin, Fatayat, Muslimat, Istighosah)",
+        "Pola Asuh Anak dan Remaja di Era Digital (PAREDI)",
+        "Penyuluhan Narkoba (bekerja sama dengan BNK Batu & Puskesmas Bumiaji)",
+        "Simulasi pertemuan PKK RT/RW/Desa",
+        "Gotong-Royong (kerja bakti, lomba HKG PKK KB-Kesehatan, HUT RI, HUT Kota Batu)",
+        "Rukun Kematian (pelatihan pemulasaran jenazah)",
+        "Arisan/Jimpitan",
+        "Lansia (Posyandu Lansia, tensi, senam lansia 2x/minggu)",
+        "Kegiatan Sosial (santunan anak yatim, bantuan orang sakit tidak mampu)",
+        "Remaja (Posyandu Remaja, pemeriksaan kesehatan, tablet tambah darah)"
+      ]
+    },
+    2: {
+      title: "Pokja II — Pendidikan dan Ketrampilan, Koperasi",
+      items: [
+        "Pendidikan dan Ketrampilan (pelatihan pengolahan makanan, batik tulis)",
+        "Perpustakaan dan Taman Bacaan",
+        "BKB (Bina Keluarga Balita) & Sekolah Orang Tua Hebat (stunting)",
+        "Pendataan PKK RT/RW, kelompok PADU, anak usia sekolah, anak putus sekolah",
+        "Pengembangan Kehidupan Berkoperasi: UP2K-PKK, Kampung DILAN, pelatihan koperasi"
+      ]
+    },
+    3: {
+      title: "Pokja III — Pangan, Sandang, Perumahan",
+      items: [
+        "Pangan: penyuluhan toga & warung hidup, Lomba Cipta Menu, Kawasan Rumah Pangan Lestari (KRPL)",
+        "Perumahan: rumah sehat & layak huni, pemanfaatan pekarangan, bibit sayur dari Dinas Pertanian",
+        "Sandang: penyuluhan berpakaian, baju rajutan, pelatihan batik tulis"
+      ]
+    },
+    4: {
+      title: "Pokja IV — Kesehatan dan Kelestarian Lingkungan Hidup",
+      items: [
+        "Kesehatan: Posyandu ILP (semua siklus hidup), PMT & susu balita stunting, kelas ibu hamil, Pap smear, Safari KB",
+        "Pencatatan bayi lahir/mati, imunisasi, kunjungan rumah, kaderisasi kesehatan lingkungan",
+        "Kelestarian Lingkungan Hidup: penyuluhan lingkungan lewat dasa wisma, program penanaman pohon"
+      ]
+    }
+  },
+  berita: [
+    {
+      id: 1,
+      title: "Capaian Program Kerja PKK Desa Bulukerto Tahun 2025 Capai 95%",
+      date: "2025-12-20",
+      author: "Admin",
+      excerpt: "Berdasarkan evaluasi akhir tahun, TP PKK Desa Bulukerto berhasil merealisasikan sebagian besar program kerjanya...",
+      content: "Profil singkat PKK Desa Bulukerto: organisasi pemberdayaan & kesejahteraan keluarga, mencakup 4 Dukuh (Gintung, Buludendeng, Keliran, Cangar), terdiri 4 RW dan 26 RT. Ketua TP PKK Desa Bulukerto 2025: Siti Anisatul Khoiriyah, S.Sos. Capaian program kerja tahun 2025 mencapai 95%. Sumber dana kegiatan PKK didukung oleh ADD, DD, BHP Desa, dan swadaya masyarakat. Kami juga bekerja sama dengan Pemerintah Desa Bulukerto, Dinas Kesehatan, Dinas P3AP2KB, dll.",
+      image: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=800"
+    },
+    {
+      id: 2,
+      title: "Penyuluhan Toga & Warung Hidup oleh Pokja III",
+      date: "2025-11-15",
+      author: "Admin",
+      excerpt: "Kegiatan ini bertujuan untuk meningkatkan ketahanan pangan keluarga melalui pemanfaatan pekarangan...",
+      content: "Pokja III PKK Desa Bulukerto mengadakan penyuluhan toga dan warung hidup. Acara ini dihadiri oleh puluhan ibu-ibu dari berbagai RT...",
+      image: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?auto=format&fit=crop&q=80&w=800"
+    }
+  ],
+  galeri: [
+    { id: 1, url: "https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?auto=format&fit=crop&q=80&w=400", caption: "Kegiatan Gotong Royong" },
+    { id: 2, url: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?auto=format&fit=crop&q=80&w=400", caption: "Rapat Koordinasi" },
+    { id: 3, url: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=400", caption: "Pelatihan Keterampilan" },
+  ]
+};
+
+export default function App() {
+  const [currentPath, setCurrentPath] = useState('/');
+  const [user, setUser] = useState(null); // null (Guest), {role: 'member'}, {role: 'admin'}
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [db, setDb] = useState(initialData);
+
+  useEffect(() => {
+    injectFonts();
+  }, []);
+
+  // Simulating Routing
+  const navigate = (path) => {
+    setCurrentPath(path);
+    setMobileMenuOpen(false);
+    setActiveDropdown(null);
+    window.scrollTo(0, 0);
+  };
+
+  // Simulating Login
+  const handleLogin = (username, password) => {
+    if (username === 'admin' && password === 'password') {
+      setUser({ username: 'Admin', role: 'admin' });
+      navigate('/admin');
+    } else if (username === 'anggota' && password === 'password') {
+      setUser({ username: 'Anggota', role: 'member' });
+      navigate('/');
+    } else {
+      alert('Username atau password salah!');
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    navigate('/');
+  };
+
+  // Inline Edit Overlay Component
+  const AdminEditOverlay = ({ onEdit }) => {
+    if (user?.role !== 'admin') return null;
+    return (
+      <button 
+        onClick={onEdit}
+        className="absolute top-2 right-2 bg-yellow-400 text-[#004080] p-2 rounded-full shadow-lg hover:bg-yellow-300 transition z-10"
+        title="Edit Bagian Ini (Mode Admin)"
+      >
+        <Edit size={16} />
+      </button>
+    );
+  };
+
+  // --- UI COMPONENTS ---
+
+  const TopBar = () => (
+    <div className="bg-[#004080] text-white py-2 px-4 text-sm w-full z-50">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-2">
+            <Phone size={14} /> <span>0813-2732-6063</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Mail size={14} /> <span>kontak@pkk-bulukerto.desa.id</span> {/* Ganti email disini */}
+          </div>
+        </div>
+        <div className="hidden md:block">
+          © PKK Desa Bulukerto {new Date().getFullYear()}
+        </div>
+      </div>
+    </div>
+  );
+
+  const Header = () => {
+    const navItems = [
+      { label: 'BERANDA', path: '/' },
+      { 
+        label: 'PROFIL PKK', 
+        dropdown: [
+          { label: 'Struktur Organisasi', path: '/profil/struktur' },
+          { label: 'Visi Misi PKK', path: '/profil/visi-misi' },
+          { label: 'Tugas Pokok', path: '/profil/tugas' }
+        ]
+      },
+      { 
+        label: 'PROGRAM KERJA', 
+        dropdown: [
+          { label: 'Pokja I', path: '/pokja/1' },
+          { label: 'Pokja II', path: '/pokja/2' },
+          { label: 'Pokja III', path: '/pokja/3' },
+          { label: 'Pokja IV', path: '/pokja/4' }
+        ]
+      },
+      { label: 'BERITA', path: '/berita' },
+      { label: 'GALERI', path: '/galeri' },
+    ];
+
+    return (
+      <header className="bg-white shadow-md sticky top-0 z-40 w-full">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+            <img src="https://i.imgur.com/RKo7mpg.jpeg" alt="Logo PKK" className="h-12 w-auto object-contain" />
+            <div className="font-bold text-[#004080] leading-tight hidden sm:block">
+              <div className="text-lg">PKK DESA BULUKERTO</div>
+              <div className="text-xs font-normal text-[#333333]">Kec. Bumiaji, Kota Batu</div>
+            </div>
+          </div>
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6 text-[#004080] font-semibold text-sm">
+            {navItems.map((item, idx) => (
+              <div key={idx} className="relative group">
+                {item.dropdown ? (
+                  <div 
+                    className="flex items-center gap-1 cursor-pointer hover:text-blue-600"
+                    onMouseEnter={() => setActiveDropdown(item.label)}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    {item.label} <ChevronDown size={14} />
+                    {activeDropdown === item.label && (
+                      <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-lg border-t-2 border-[#004080] rounded-b-md py-2 flex flex-col z-50">
+                        {item.dropdown.map((drop, dIdx) => (
+                          <div 
+                            key={dIdx} 
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-[#333333] font-normal"
+                            onClick={() => navigate(drop.path)}
+                          >
+                            {drop.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div 
+                    className="cursor-pointer hover:text-blue-600"
+                    onClick={() => navigate(item.path)}
+                  >
+                    {item.label}
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {/* User Area */}
+            {user ? (
+              <div className="relative group cursor-pointer flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full">
+                <User size={16} /> <span>{user.username}</span>
+                <div className="absolute top-full right-0 mt-2 w-32 bg-white shadow-lg rounded-md py-2 hidden group-hover:flex flex-col z-50">
+                  {user.role === 'admin' && (
+                    <div className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2" onClick={() => navigate('/admin')}>
+                      <LayoutDashboard size={14} /> CMS Admin
+                    </div>
+                  )}
+                  <div className="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600" onClick={handleLogout}>
+                    <LogOut size={14} /> Logout
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={() => navigate('/login')}
+                className="bg-[#004080] text-white px-4 py-1.5 rounded-full hover:bg-blue-800 transition"
+              >
+                LOGIN
+              </button>
+            )}
+          </nav>
+
+          {/* Mobile Menu Toggle */}
+          <button className="md:hidden text-[#004080]" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Nav */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t p-4 flex flex-col gap-4 text-[#004080] font-semibold">
+            {navItems.map((item, idx) => (
+              <div key={idx}>
+                {item.dropdown ? (
+                  <div>
+                    <div 
+                      className="flex justify-between items-center py-2"
+                      onClick={() => setActiveDropdown(activeDropdown === item.label ? null : item.label)}
+                    >
+                      {item.label} <ChevronDown size={16} className={`transform transition ${activeDropdown === item.label ? 'rotate-180' : ''}`} />
+                    </div>
+                    {activeDropdown === item.label && (
+                      <div className="pl-4 py-2 flex flex-col gap-2 font-normal text-[#333333]">
+                        {item.dropdown.map((drop, dIdx) => (
+                          <div key={dIdx} onClick={() => navigate(drop.path)}>{drop.label}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="py-2" onClick={() => navigate(item.path)}>{item.label}</div>
+                )}
+              </div>
+            ))}
+            <hr />
+            {user ? (
+               <div className="py-2 flex justify-between items-center">
+                 <span>Hi, {user.username}</span>
+                 {user.role === 'admin' && <button onClick={() => navigate('/admin')} className="text-blue-600">Admin Panel</button>}
+                 <button onClick={handleLogout} className="text-red-600">Logout</button>
+               </div>
+            ) : (
+              <div className="py-2" onClick={() => navigate('/login')}>LOGIN / DAFTAR</div>
+            )}
+          </div>
+        )}
+      </header>
+    );
+  };
+
+  const FloatingSocial = () => (
+    <div className="hidden md:flex fixed left-0 top-1/2 transform -translate-y-1/2 flex-col gap-1 z-30">
+      <a href="#" className="bg-blue-600 text-white p-3 hover:w-16 transition-all duration-300 w-12 flex justify-end rounded-r-lg shadow-md"><Facebook size={20} /></a>
+      <a href="#" className="bg-green-500 text-white p-3 hover:w-16 transition-all duration-300 w-12 flex justify-end rounded-r-lg shadow-md"><MessageCircle size={20} /></a>
+      <a href="#" className="bg-gray-600 text-white p-3 hover:w-16 transition-all duration-300 w-12 flex justify-end rounded-r-lg shadow-md"><Mail size={20} /></a>
+    </div>
+  );
+
+  const Footer = () => (
+    <footer className="bg-[#333333] text-white pt-10 pb-4 mt-20">
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div>
+          <h3 className="font-bold text-xl mb-4 flex items-center gap-2"><img src="https://i.imgur.com/RKo7mpg.jpeg" className="h-8 bg-white p-1 rounded" alt="Logo"/> PKK Bulukerto</h3>
+          <p className="text-gray-300 text-sm leading-relaxed">
+            Organisasi pemberdayaan & kesejahteraan keluarga, mencakup 4 Dukuh (Gintung, Buludendeng, Keliran, Cangar), terdiri 4 RW dan 26 RT di Desa Bulukerto, Kota Batu.
+          </p>
+        </div>
+        <div>
+          <h3 className="font-bold text-lg mb-4 text-[#004080] bg-white inline-block px-2 rounded">Tautan Cepat</h3>
+          <ul className="space-y-2 text-sm text-gray-300">
+            <li className="hover:text-white cursor-pointer" onClick={() => navigate('/')}>Beranda</li>
+            <li className="hover:text-white cursor-pointer" onClick={() => navigate('/profil/struktur')}>Struktur Organisasi</li>
+            <li className="hover:text-white cursor-pointer" onClick={() => navigate('/berita')}>Berita & Agenda</li>
+            <li className="hover:text-white cursor-pointer" onClick={() => navigate('/galeri')}>Galeri Kegiatan</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-bold text-lg mb-4 text-[#004080] bg-white inline-block px-2 rounded">Kontak Kami</h3>
+          <ul className="space-y-2 text-sm text-gray-300">
+            <li className="flex items-center gap-2"><Phone size={16}/> 0813-2732-6063</li>
+            <li className="flex items-center gap-2"><Mail size={16}/> kontak@pkk-bulukerto.desa.id</li>
+            <li className="flex items-start gap-2"><Share2 size={16} className="mt-1"/> Kantor Desa Bulukerto, Kec. Bumiaji, Kota Batu, Jawa Timur</li>
+          </ul>
+        </div>
+      </div>
+      <div className="text-center text-sm text-gray-500 border-t border-gray-700 pt-4">
+        © {new Date().getFullYear()} Tim Penggerak PKK Desa Bulukerto. All Rights Reserved.
+      </div>
+    </footer>
+  );
+
+  // --- PAGES ---
+
+  const Home = () => (
+    <div className="animate-fade-in font-[Poppins]">
+      {/* Hero Banner */}
+      <div className="relative w-full h-[400px] md:h-[500px] bg-gray-900 group">
+        <img 
+          src="https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?auto=format&fit=crop&q=80&w=1600" 
+          alt="Hero" 
+          className="w-full h-full object-cover opacity-60"
+        />
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">Gerakan Pemberdayaan &<br/>Kesejahteraan Keluarga</h1>
+          <p className="text-lg text-gray-200 mb-8 max-w-2xl drop-shadow-md">Bersama Mewujudkan Keluarga Sehat, Sejahtera, Maju dan Mandiri di Desa Bulukerto.</p>
+          <button 
+            onClick={() => navigate('/profil/visi-misi')}
+            className="bg-[#004080] text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            Pelajari Lebih Lanjut <ArrowRight size={18} />
+          </button>
+        </div>
+        <AdminEditOverlay onEdit={() => navigate('/admin')} />
+      </div>
+
+      {/* Main Content 2 Col */}
+      <div className="max-w-7xl mx-auto px-4 py-12 flex flex-col md:flex-row gap-8">
+        {/* Left Column - Berita 60% */}
+        <div className="w-full md:w-[60%]">
+          <div className="flex justify-between items-end border-b-2 border-[#004080] pb-2 mb-6">
+            <h2 className="text-2xl font-bold text-[#333333] flex items-center gap-2">
+              Berita Terakhir
+            </h2>
+            <button onClick={() => navigate('/berita')} className="text-[#004080] text-sm hover:underline flex items-center gap-1">
+              Lihat Semua <ArrowRight size={14}/>
+            </button>
+          </div>
+          
+          <div className="space-y-6">
+            {db.berita.slice(0, 2).map((news) => (
+              <div key={news.id} className="relative flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-lg shadow border border-gray-100 group hover:shadow-md transition cursor-pointer" onClick={() => navigate(`/berita/${news.id}`)}>
+                <img src={news.image} alt={news.title} className="w-full sm:w-48 h-32 object-cover rounded-md" />
+                <div className="flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">{news.date} | Oleh {news.author}</p>
+                    <h3 className="text-lg font-bold text-[#004080] leading-tight mb-2 group-hover:text-blue-600 transition">{news.title}</h3>
+                    <p className="text-sm text-[#333333] line-clamp-2">{news.excerpt}</p>
+                  </div>
+                </div>
+                <AdminEditOverlay onEdit={(e) => { e.stopPropagation(); navigate('/admin'); }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Column - Widget 40% */}
+        <div className="w-full md:w-[40%] space-y-8">
+          {/* Quick Links Pokja */}
+          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-bold text-[#004080] mb-4">Program Kerja Pokja</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {[1,2,3,4].map(num => (
+                <button 
+                  key={num} 
+                  onClick={() => navigate(`/pokja/${num}`)}
+                  className="bg-white border border-[#004080] text-[#004080] py-2 rounded font-semibold hover:bg-[#004080] hover:text-white transition"
+                >
+                  POKJA {num}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Galeri Singkat */}
+          <div>
+             <h3 className="text-lg font-bold text-[#333333] mb-4 border-l-4 border-[#004080] pl-2">Galeri Terbaru</h3>
+             <div className="grid grid-cols-2 gap-2">
+               {db.galeri.slice(0, 4).map(foto => (
+                 <img key={foto.id} src={foto.url} alt={foto.caption} className="w-full h-24 object-cover rounded hover:opacity-80 transition cursor-pointer" onClick={() => navigate('/galeri')} />
+               ))}
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ProfilVisiMisi = () => (
+    <div className="max-w-4xl mx-auto px-4 py-12 relative animate-fade-in font-[Poppins]">
+      <AdminEditOverlay onEdit={() => navigate('/admin')} />
+      <h1 className="text-3xl font-bold text-[#004080] mb-8 border-b-2 border-gray-200 pb-4">Visi & Misi PKK</h1>
+      
+      <div className="bg-blue-50 p-6 rounded-lg mb-8 border border-blue-100">
+        <h2 className="text-xl font-bold text-[#004080] mb-4">Visi</h2>
+        <p className="text-[#333333] leading-relaxed text-lg italic">"{db.profil.visi}"</p>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold text-[#004080] mb-4">Misi</h2>
+        <ul className="list-decimal pl-6 space-y-3 text-[#333333]">
+          {db.profil.misi.map((m, idx) => <li key={idx} className="leading-relaxed">{m}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+
+  const ProfilTugas = () => (
+    <div className="max-w-4xl mx-auto px-4 py-12 relative animate-fade-in font-[Poppins]">
+      <AdminEditOverlay onEdit={() => navigate('/admin')} />
+      <h1 className="text-3xl font-bold text-[#004080] mb-8 border-b-2 border-gray-200 pb-4">Tugas Pokok PKK</h1>
+      <p className="text-[#333333] leading-relaxed text-lg bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm">
+        {db.profil.tugas}
+      </p>
+    </div>
+  );
+
+  const ProfilStruktur = () => (
+    <div className="max-w-5xl mx-auto px-4 py-12 relative animate-fade-in font-[Poppins]">
+      <AdminEditOverlay onEdit={() => navigate('/admin')} />
+      <h1 className="text-3xl font-bold text-[#004080] mb-8 border-b-2 border-gray-200 pb-4 text-center">Struktur Organisasi</h1>
+      
+      <div className="flex justify-center mb-12">
+        <img src="https://i.imgur.com/ofbSbWA.png" alt="Bagan Struktur Organisasi" className="max-w-full h-auto rounded shadow-lg border border-gray-200" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-[#333333] mb-6 text-center">Daftar Pengurus Inti</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {db.struktur.map(item => (
+          <div key={item.id} className="bg-white p-6 rounded-xl shadow-md border-t-4 border-[#004080] text-center">
+            <div className="w-16 h-16 bg-blue-100 text-[#004080] rounded-full flex items-center justify-center mx-auto mb-4">
+              <User size={32} />
+            </div>
+            <h3 className="text-sm text-gray-500 font-semibold uppercase tracking-wider mb-1">{item.jabatan}</h3>
+            <p className="text-lg font-bold text-[#333333]">{item.nama}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const PokjaPage = ({ id }) => {
+    const data = db.pokja[id];
+    if(!data) return null;
+
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 relative animate-fade-in font-[Poppins]">
+        <AdminEditOverlay onEdit={() => navigate('/admin')} />
+        <h1 className="text-3xl font-bold text-[#004080] mb-8 border-b-2 border-gray-200 pb-4">{data.title}</h1>
+        
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sm:p-8">
+          <h2 className="text-xl font-semibold text-[#333333] mb-6 flex items-center gap-2">
+            <FileText className="text-[#004080]"/> Program Kerja Utama
+          </h2>
+          <ul className="space-y-4">
+            {data.items.map((item, idx) => (
+              <li key={idx} className="flex items-start gap-3 text-[#333333] leading-relaxed">
+                <div className="mt-1.5 w-2 h-2 rounded-full bg-[#004080] flex-shrink-0"></div>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
+  const BeritaList = () => (
+    <div className="max-w-5xl mx-auto px-4 py-12 animate-fade-in font-[Poppins]">
+      <div className="flex justify-between items-center mb-8 border-b-2 border-gray-200 pb-4">
+        <h1 className="text-3xl font-bold text-[#004080]">Berita & Agenda</h1>
+        {user?.role === 'admin' && (
+          <button onClick={() => navigate('/admin')} className="bg-[#004080] text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-blue-800">
+            <Plus size={16}/> Tulis Berita
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {db.berita.map(news => (
+          <div key={news.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-lg transition cursor-pointer flex flex-col" onClick={() => navigate(`/berita/${news.id}`)}>
+            <img src={news.image} alt={news.title} className="w-full h-48 object-cover" />
+            <div className="p-5 flex flex-col flex-grow">
+              <p className="text-xs text-gray-500 mb-2">{news.date} | {news.author}</p>
+              <h2 className="text-xl font-bold text-[#004080] mb-3 leading-tight">{news.title}</h2>
+              <p className="text-[#333333] text-sm flex-grow mb-4">{news.excerpt}</p>
+              <div className="text-blue-600 font-semibold text-sm flex items-center gap-1 mt-auto">Baca Selengkapnya <ArrowRight size={14}/></div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Pagination Mock */}
+      <div className="flex justify-center mt-10 gap-2">
+        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Sebelumnya</button>
+        <button className="px-4 py-2 bg-[#004080] text-white rounded">1</button>
+        <button className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Selanjutnya</button>
+      </div>
+    </div>
+  );
+
+  const BeritaDetail = ({ id }) => {
+    const news = db.berita.find(b => b.id === parseInt(id));
+    if(!news) return <div className="text-center py-20">Berita tidak ditemukan</div>;
+
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-12 relative animate-fade-in font-[Poppins]">
+        <AdminEditOverlay onEdit={() => navigate('/admin')} />
+        <button onClick={() => navigate('/berita')} className="text-blue-600 mb-6 flex items-center gap-1 hover:underline">
+          &larr; Kembali ke Daftar Berita
+        </button>
+        <h1 className="text-3xl md:text-4xl font-bold text-[#004080] mb-4 leading-tight">{news.title}</h1>
+        <div className="flex items-center gap-4 text-sm text-gray-500 mb-8 border-b pb-4">
+          <span>Ditulis oleh: {news.author}</span>
+          <span>Dipublikasikan: {news.date}</span>
+        </div>
+        <img src={news.image} alt={news.title} className="w-full h-auto rounded-lg shadow-md mb-8" />
+        <div className="prose max-w-none text-[#333333] leading-relaxed whitespace-pre-line text-lg">
+          {news.content}
+        </div>
+      </div>
+    );
+  };
+
+  const Galeri = () => (
+    <div className="max-w-6xl mx-auto px-4 py-12 animate-fade-in font-[Poppins]">
+      <div className="flex justify-between items-center mb-8 border-b-2 border-gray-200 pb-4">
+        <h1 className="text-3xl font-bold text-[#004080]">Galeri Kegiatan</h1>
+        {user?.role === 'admin' && (
+          <button onClick={() => navigate('/admin')} className="bg-[#004080] text-white px-4 py-2 rounded flex items-center gap-2 text-sm hover:bg-blue-800">
+            <Plus size={16}/> Upload Foto
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {db.galeri.map(foto => (
+          <div key={foto.id} className="relative group rounded-lg overflow-hidden shadow-sm bg-black">
+            <img src={foto.url} alt={foto.caption} className="w-full h-64 object-cover opacity-90 group-hover:opacity-50 transition duration-300" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 px-4 text-center">
+              <span className="text-white font-semibold text-lg">{foto.caption}</span>
+            </div>
+            {user?.role === 'admin' && (
+               <button className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition"><Trash2 size={16}/></button>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const Login = () => {
+    const [u, setU] = useState('');
+    const [p, setP] = useState('');
+
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-gray-50 px-4 animate-fade-in font-[Poppins]">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="text-center mb-8">
+            <img src="https://i.imgur.com/RKo7mpg.jpeg" alt="Logo" className="h-16 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-[#004080]">Masuk ke Portal</h2>
+            <p className="text-sm text-gray-500 mt-2">Gunakan kredensial Anda untuk mengakses sistem.</p>
+          </div>
+          <form onSubmit={(e) => { e.preventDefault(); handleLogin(u, p); }} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-[#333333] mb-1">Username</label>
+              <input type="text" required value={u} onChange={(e) => setU(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#004080] focus:border-[#004080] outline-none" placeholder="admin / anggota" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#333333] mb-1">Password</label>
+              <input type="password" required value={p} onChange={(e) => setP(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#004080] focus:border-[#004080] outline-none" placeholder="password" />
+            </div>
+            <button type="submit" className="w-full bg-[#004080] text-white py-2.5 rounded-md font-semibold hover:bg-blue-800 transition">
+              Masuk
+            </button>
+          </form>
+          <div className="mt-6 text-xs text-center text-gray-500 bg-gray-100 p-3 rounded">
+            <strong>Demo Akun:</strong><br/>
+            Admin: <code>admin</code> / <code>password</code><br/>
+            Anggota: <code>anggota</code> / <code>password</code>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // --- ADMIN DASHBOARD COMPONENT ---
+  const AdminDashboard = () => {
+    const [activeTab, setActiveTab] = useState('berita');
+
+    if (user?.role !== 'admin') {
+      return (
+        <div className="text-center py-20 text-red-600">
+          <h2 className="text-2xl font-bold">Akses Ditolak</h2>
+          <p>Anda tidak memiliki izin untuk melihat halaman ini.</p>
+          <button onClick={() => navigate('/')} className="mt-4 underline text-[#004080]">Kembali ke Beranda</button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 font-[Poppins]">
+        {/* Sidebar */}
+        <div className="w-full md:w-64 bg-[#004080] text-white p-6 shadow-xl">
+          <h2 className="text-xl font-bold mb-8 flex items-center gap-2 border-b border-blue-700 pb-4">
+            <LayoutDashboard /> CMS Admin
+          </h2>
+          <ul className="space-y-2">
+            {[
+              { id: 'berita', icon: <FileText size={18}/>, label: 'Manajemen Berita' },
+              { id: 'galeri', icon: <ImageIcon size={18}/>, label: 'Manajemen Galeri' },
+              { id: 'struktur', icon: <Users size={18}/>, label: 'Struktur Organisasi' },
+              { id: 'pokja', icon: <Settings size={18}/>, label: 'Konten Pokja' },
+            ].map(tab => (
+              <li key={tab.id}>
+                <button 
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition text-left ${activeTab === tab.id ? 'bg-white text-[#004080] font-semibold' : 'hover:bg-blue-800'}`}
+                >
+                  {tab.icon} {tab.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button onClick={() => navigate('/')} className="w-full mt-10 flex items-center justify-center gap-2 px-4 py-2 border border-blue-400 rounded-lg hover:bg-blue-800 transition">
+            Lihat Web Publik
+          </button>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 p-8 bg-gray-50 overflow-y-auto">
+          <h1 className="text-2xl font-bold text-[#333333] mb-6 capitalize border-b pb-2">Manajemen {activeTab}</h1>
+          
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            {/* Tampilan Sederhana berdasarkan Tab (Mock CMS) */}
+            
+            {activeTab === 'berita' && (
+              <div>
+                <button className="bg-green-600 text-white px-4 py-2 rounded mb-6 flex items-center gap-2 hover:bg-green-700"><Plus size={16}/> Tulis Berita Baru</button>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-600 text-sm">
+                        <th className="p-3">Judul</th>
+                        <th className="p-3">Tanggal</th>
+                        <th className="p-3">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {db.berita.map(b => (
+                        <tr key={b.id} className="border-b">
+                          <td className="p-3 font-medium text-[#004080]">{b.title}</td>
+                          <td className="p-3 text-sm text-gray-500">{b.date}</td>
+                          <td className="p-3 flex gap-2">
+                            <button className="p-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200" title="Edit"><Edit size={14}/></button>
+                            <button className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200" title="Hapus"><Trash2 size={14}/></button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'struktur' && (
+               <div className="space-y-4">
+                 <p className="text-sm text-gray-500 mb-4">*Ubah nama pengurus, biarkan kosong jika belum ada.</p>
+                 {db.struktur.map((item, idx) => (
+                   <div key={item.id} className="flex flex-col sm:flex-row gap-4 items-center bg-gray-50 p-3 rounded border">
+                     <div className="w-full sm:w-1/3 font-semibold text-[#004080]">{item.jabatan}</div>
+                     <input 
+                        type="text" 
+                        value={item.nama}
+                        onChange={(e) => {
+                          const newStruktur = [...db.struktur];
+                          newStruktur[idx].nama = e.target.value;
+                          setDb({...db, struktur: newStruktur});
+                        }}
+                        className="flex-1 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#004080] outline-none w-full"
+                     />
+                   </div>
+                 ))}
+                 <button className="bg-[#004080] text-white px-6 py-2 rounded font-semibold mt-4">Simpan Perubahan</button>
+               </div>
+            )}
+
+            {(activeTab === 'galeri' || activeTab === 'pokja') && (
+              <div className="text-center py-10 text-gray-500">
+                <ImageIcon size={48} className="mx-auto mb-4 opacity-50" />
+                <p>Modul {activeTab} siap diintegrasikan dengan API Backend.</p>
+                <p className="text-sm mt-2">Di aplikasi produksi, bagian ini menggunakan form upload (Sharp kompresi) dan Rich Text Editor (TipTap/React-Quill).</p>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // --- ROUTER OUTLET ---
+  const renderView = () => {
+    if (currentPath.startsWith('/admin')) return <AdminDashboard />;
+    if (currentPath === '/login') return <Login />;
+    
+    // Public Layout
+    return (
+      <div className="min-h-screen flex flex-col relative bg-white">
+        <FloatingSocial />
+        <TopBar />
+        <Header />
+        <main className="flex-grow">
+          {currentPath === '/' && <Home />}
+          {currentPath === '/profil/visi-misi' && <ProfilVisiMisi />}
+          {currentPath === '/profil/tugas' && <ProfilTugas />}
+          {currentPath === '/profil/struktur' && <ProfilStruktur />}
+          {currentPath.startsWith('/pokja/') && <PokjaPage id={currentPath.split('/')[2]} />}
+          {currentPath === '/berita' && <BeritaList />}
+          {currentPath.startsWith('/berita/') && <BeritaDetail id={currentPath.split('/')[2]} />}
+          {currentPath === '/galeri' && <Galeri />}
+        </main>
+        <Footer />
+      </div>
+    );
+  };
+
+  return renderView();
+}
